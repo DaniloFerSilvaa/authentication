@@ -1,6 +1,10 @@
 import { Request, Response } from "express";
 import { Sequelize } from "sequelize";
 import { User } from "../models/name-db";
+import dotenv from "dotenv";
+import JWT from "jsonwebtoken";
+
+dotenv.config();
 
 export const ping = (req:Request, res:Response) => {
     res.json({pong: true})
@@ -14,8 +18,14 @@ export const register = async (req:Request, res:Response) => {
         if (!hasUser) {
             let newUser = await User.create({ email, password });
 
+            const token = JWT.sign(
+                {  id: newUser.id, email: newUser.email  },
+                process.env.JWT_SECRET_KEY as string,
+                { expiresIn: '2h' }
+            )
+
             res.status(201);
-            res.json({ id: newUser.id });
+            res.json({  id: newUser.id ,  token });
         } else{
             res.json({ error: 'E-mail já existe.' });
         }
@@ -34,7 +44,13 @@ export const login = async (req:Request, res:Response) => {
             where: { email, password }
         });
         if (user) {
-            res.json({ status: true })
+            const token = JWT.sign(
+                {  id: user.id, email: user.email  },
+                process.env.JWT_SECRET_KEY as string,
+                { expiresIn: '2h' }
+            )
+
+            res.json({ status: true, token })
             return;
         }
 

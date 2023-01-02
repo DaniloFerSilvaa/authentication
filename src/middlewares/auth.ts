@@ -1,5 +1,9 @@
 import { Request, Response, NextFunction } from "express";
 import { User } from "../models/name-db";
+import JWT from 'jsonwebtoken';
+import dotenv from 'dotenv'
+
+dotenv.config();
 
 export const Auth = {
     private: async (req: Request, res: Response, next: NextFunction) => {
@@ -7,7 +11,41 @@ export const Auth = {
         let userData = req.headers.authorization
 
         if (userData) {
-            let hash: string = userData.substring(6);
+            
+            const  [authType, token] = userData.split(' ')
+            if (authType === 'Bearer') {
+                try {
+                        JWT.verify(
+                            token,
+                            process.env.JWT_SECRET_KEY as string
+                        );
+                    
+                        success = true
+                }catch(err){
+                }
+
+            }
+
+        }
+
+        if (success) {
+            
+            next();
+        } else{
+            res.status(403);
+            res.json({ error: "Não autorizado" });
+        }
+        
+    }
+}
+
+/*
+BASIC Auth
+
+let success = false;
+        let userData = req.headers.authorization
+
+  let hash: string = userData.substring(6);
             let decoded: string = Buffer.from(hash, 'base64').toString();
             let data: string[] = decoded.split(':');
 
@@ -22,16 +60,4 @@ export const Auth = {
                     success = true
                 }
             }
-
-        }
-
-        if (success) {
-            
-            next();
-        } else{
-            res.status(403);
-            res.json({ error: "Não autorizado" })
-        }
-        
-    }
-}
+*/
