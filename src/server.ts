@@ -1,4 +1,4 @@
-import  express, { Request, Response } from "express";
+import  express, { ErrorRequestHandler, Request, Response } from "express";
 import path from "path";
 import dotenv from 'dotenv';
 import mainRouter from './routes/routes'
@@ -18,4 +18,19 @@ server.use((req:Request, res:Response) => {
     res.json({error: 'endpoint não encontrada'})
 });
 
-server.listen(process.env.PORT)
+const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
+    if (err.status) {
+        res.status(err.status);
+    } else {
+        res.status(400); //Bad Request
+    }
+    if (err.message) {
+        res.json({ error: err.message });
+
+    }else {
+        res.json({error: 'Ocorreu um erro;'});
+    }
+}
+server.use(errorHandler);
+
+server.listen(process.env.PORT);

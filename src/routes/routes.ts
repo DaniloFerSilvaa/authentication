@@ -2,6 +2,7 @@ import { Router } from "express";
 import * as ApiController from '../controllers/apiController';
 import * as EmailController from '../controllers/emailController';
 import { Auth } from "../middlewares/auth";
+import { privateRoute } from "../config/passport";
 
 
 const router = Router();
@@ -13,10 +14,10 @@ router.get('/', ( req, res ) => {
 router.get('/ping', ApiController.ping);
 
 router.post('/register', ApiController.register);
-router.post('/login', ApiController.login);
+router.post('/login', privateRoute, ApiController.login);
 
-router.get('/list', Auth.private, ApiController.list);
+router.get('/list', Auth.private, ApiController.list);//private basic
 
-router.post ('/contato', EmailController.contato)
+router.post ('/contato',privateRoute, EmailController.contato)//private com basic passport
 
 export default router;
