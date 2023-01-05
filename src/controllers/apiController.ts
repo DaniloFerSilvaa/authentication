@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { Sequelize } from "sequelize";
 import { User } from "../models/name-db";
 import dotenv from "dotenv";
-import JWT from "jsonwebtoken";
+import { generateToken } from "../config/passport";
 
 dotenv.config();
 
@@ -18,12 +18,8 @@ export const register = async (req:Request, res:Response) => {
         if (!hasUser) {
             let newUser = await User.create({ email, password });
 
-            const token = JWT.sign(
-                {  id: newUser.id, email: newUser.email  },
-                process.env.JWT_SECRET_KEY as string,
-                { expiresIn: '2h' }
-            )
-
+            const token = generateToken({ id: newUser.id });
+        
             res.status(201);
             res.json({  id: newUser.id ,  token });
         } else{
@@ -36,7 +32,23 @@ export const register = async (req:Request, res:Response) => {
 }
 
 export const login = async (req:Request, res:Response) => {
-    res.json({ status: true, user: req.user });
+    if (req.body.email && req.body.password) {
+        let email: string = req.body.email;
+        let password: string = req.body.password
+        console.log('EMAIL E SENHA: ', email, password)
+
+        let user = await User.findOne({
+            where: { email, password }
+        });
+        
+        if (user) {
+            const token = generateToken({ id: user.id });
+            res.json({ status: true, token });
+            return;
+        } else {
+            res.json({ status: false });
+            }
+    }
 }
 
 export const list = async (req:Request, res:Response) => {

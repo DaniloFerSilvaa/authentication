@@ -1,10 +1,11 @@
 import { Request, Response, NextFunction } from "express";
-import { User } from "../models/name-db";
-import JWT from 'jsonwebtoken';
+import  JWT  from "jsonwebtoken";
 import dotenv from 'dotenv'
 
 dotenv.config();
 
+
+//JWT AUTH SEM PASSPORT
 export const Auth = {
     private: async (req: Request, res: Response, next: NextFunction) => {
         let success = false;
@@ -38,6 +39,7 @@ export const Auth = {
         
     }
 }
+
 
 /*
 BASIC Auth
